@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHE 306 Formula Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --panel:#ffffff; --ink:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --soft:#f3f4f6; --given:#047857; --givenbg:#d1fae5; --mem:#b45309; --membg:#fef3c7;
+  --tip:#fff7ed; --tipline:#fdba74; --accent:#4f46e5;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b0f17; --panel:#121826; --ink:#e5e7eb; --muted:#9ca3af; --line:#1f2937;
+    --soft:#1a2232; --given:#34d399; --givenbg:#063b2c; --mem:#fbbf24; --membg:#3b2a06;
+    --tip:#2a1c0d; --tipline:#9a5b1a; --accent:#818cf8; }
+  mjx-container svg{ color:var(--ink); }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:linear-gradient(135deg,#312e81,#4f46e5 55%,#7c3aed);color:#fff;padding:28px 24px 22px}
+header .wrap{max-width:1280px;margin:0 auto}
+header h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em}
+header p{margin:6px 0 0;opacity:.85;font-size:14px}
+.stats{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.bar .wrap{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#q{flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--soft);color:var(--ink)}
+#q:focus{outline:2px solid var(--accent);border-color:transparent}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 12px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.layout{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:250px 1fr;gap:24px;padding:20px 24px 60px}
+nav{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto}
+nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:13.5px;font-weight:500}
+nav a:hover{background:var(--soft)}
+nav .dot{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;flex:none}
+nav .cnt{margin-left:auto;color:var(--muted);font-size:12px}
+nav .sep{margin:12px 10px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.legend{margin:14px 10px;font-size:12px;color:var(--muted)}
+.legend div{margin:6px 0;display:flex;gap:8px;align-items:center}
+section.chap{margin-bottom:34px}
+.chhead{display:flex;align-items:center;gap:12px;margin:6px 0 14px}
+.chhead .num{width:40px;height:40px;border-radius:10px;color:#fff;display:grid;place-items:center;font-weight:800}
+.chhead h2{margin:0;font-size:20px;letter-spacing:-.01em}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden;border-left:4px solid var(--c)}
+.ctop{display:flex;gap:10px;align-items:center;padding:14px 18px 4px;flex-wrap:wrap}
+.ctop h3{margin:0;font-size:16px;font-weight:700}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+.badge.given{background:var(--givenbg);color:var(--given)}
+.badge.mem{background:var(--membg);color:var(--mem)}
+.eq{padding:8px 18px 6px;overflow-x:auto;font-size:15px}
+.use{padding:0 18px 10px;color:var(--muted);font-size:13.5px}
+.use b{color:var(--ink)}
+.tip{margin:0 18px 12px;padding:9px 12px;background:var(--tip);border-left:3px solid var(--tipline);border-radius:6px;font-size:13px}
+details{border-top:1px solid var(--line)}
+summary{padding:10px 18px;cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);list-style:none;user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";}
+details[open] summary::before{content:"▾ ";}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 12px;background:var(--soft);font-weight:700}
+td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+td.sym{width:110px;font-size:15px}
+td.unit{width:150px;color:var(--muted);font-weight:500}
+.tw{overflow-x:auto}
+.hidden{display:none!important}
+#empty{padding:40px;text-align:center;color:var(--muted)}
+.gl td.sym{width:120px}
+.gl a{color:var(--accent);text-decoration:none;font-size:12px;margin-right:8px;white-space:nowrap}
+.gl a:hover{text-decoration:underline}
+.flash{animation:fl 1.4s ease}
+@keyframes fl{0%{box-shadow:0 0 0 4px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.loading{padding:30px;color:var(--muted);text-align:center}
+footer{max-width:1280px;margin:0 auto;padding:0 24px 40px;color:var(--muted);font-size:12px}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr;padding:14px}
+  nav{display:none}
+  td.unit{width:auto}
+  header h1{font-size:22px}
+}
+</style>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async id="mj"></script>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>CHE 306 Formula Explorer</h1>
+  <p>Separation Processes · Wankat, <i>Separation Process Engineering</i> 4th ed. · Chapters 2, 3, 4, 5, 7, 9, 10, 12, 13</p>
+  <div class="stats" id="stats"></div>
+</div></header>
+
+<div class="bar"><div class="wrap">
+  <input id="q" type="search" placeholder="Search a formula, symbol or unit… e.g. Kremser, reflux, ft/s, α">
+  <div class="chips" id="fchips">
+    <button class="chip on" data-f="all">All</button>
+    <button class="chip" data-f="given">Given in exam</button>
+    <button class="chip" data-f="mem">Memorize</button>
+  </div>
+  <div class="chips" id="vchips">
+    <button class="chip on" data-v="formulas">Formulas</button>
+    <button class="chip" data-v="glossary">Symbol glossary</button>
+  </div>
+</div></div>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"><div class="loading">Rendering equations…</div></main>
+</div>
+<footer>Built from the CHE 306 slides (T-252) and the final-exam formula sheet. “Given in exam” = printed on the T-252 formula sheet; “Memorize” = not on the sheet. Notes in orange flag common mistakes and a few places where the sheet differs from the textbook. Confirm those with your instructor.</footer>
+
+<script>
+// ===== Symbol dictionary (shared across formulas) =====
+const r = String.raw;
+const S = {
+  F:   {t:r`F`, n:"Feed flow rate", u:"kmol/h, lbmol/h (or kg/h)", h:"Given in the problem statement."},
+  z:   {t:r`z`, n:"Feed mole fraction of the more volatile component (MVC)", u:"– (mole fraction)", h:"Given. If given in wt%, convert to mole fraction using MWs first."},
+  zi:  {t:r`z_i`, n:"Feed mole fraction of component i", u:"–", h:"Given in the feed specification."},
+  x:   {t:r`x`, n:"Liquid mole fraction of MVC", u:"–", h:"Read from the equilibrium curve / T-x-y diagram, or from the intersection with the operating line."},
+  y:   {t:r`y`, n:"Vapor mole fraction of MVC", u:"–", h:"From equilibrium (y-x curve, y = Kx, or y = αx/(1+(α−1)x))."},
+  xi:  {t:r`x_i`, n:"Liquid mole fraction of component i", u:"–", h:"From Rachford-Rice: x_i = z_i / [1 + (K_i − 1)V/F]."},
+  yi:  {t:r`y_i`, n:"Vapor mole fraction of component i", u:"–", h:"y_i = K_i x_i once x_i is known."},
+  V:   {t:r`V`, n:"Vapor molar flow rate (rectifying section / flash vapor)", u:"kmol/h, lbmol/h", h:"Flash: V = fF. Column: V = L + D = D(1 + L/D)."},
+  L:   {t:r`L`, n:"Liquid molar flow rate (rectifying section / flash liquid)", u:"kmol/h, lbmol/h", h:"Flash: L = F − V. Column: L = (L/D)·D (reflux ratio × distillate)."},
+  Vb:  {t:r`\overline{V}`, n:"Vapor flow in the stripping section (below feed)", u:"kmol/h", h:"V̄ = V − (1 − q)F, or from the boilup ratio V̄/B."},
+  Lb:  {t:r`\overline{L}`, n:"Liquid flow in the stripping section (below feed)", u:"kmol/h", h:"L̄ = L + qF, or L̄ = V̄ + B."},
+  D:   {t:r`D`, n:"Distillate flow rate", u:"kmol/h", h:"From external mass balance: D = F(z − x_B)/(x_D − x_B)."},
+  B:   {t:r`B`, n:"Bottoms flow rate", u:"kmol/h", h:"B = F − D."},
+  xD:  {t:r`x_D`, n:"Distillate mole fraction of MVC", u:"–", h:"Given as a product specification."},
+  xB:  {t:r`x_B`, n:"Bottoms mole fraction of MVC", u:"–", h:"Given as a product specification."},
+  q:   {t:r`q`, n:"Feed quality (fraction of feed that is liquid)", u:"–", h:"Sat. liquid → 1; sat. vapor → 0; two-phase → liquid fraction; subcooled > 1; superheated < 0. In general q = (H_V − h_F)/(H_V − h_L)."},
+  f:   {t:r`f = V/F`, n:"Fraction of feed vaporized", u:"–", h:"Given, or found by trial (Rachford-Rice). Note f = 1 − q for a flash."},
+  K:   {t:r`K_i`, n:"Equilibrium ratio (K value) of component i", u:"–", h:"From the DePriester chart at T_drum and P_drum (or the McWilliams fit)."},
+  alpha:{t:r`\alpha_{AB}`, n:"Relative volatility of A to B", u:"–", h:"α = K_A/K_B from DePriester at the same T & P, or from VLE data. For a column use the geometric average √(α_top·α_bot)."},
+  R:   {t:r`L_0/D`, n:"External reflux ratio", u:"–", h:"Given, or chosen as a multiple (1.05–1.5) of (L/D)_min."},
+  hF:  {t:r`h_F`, n:"Enthalpy of the feed", u:"kJ/kmol (cal/mol, Btu/lbmol)", h:"From the enthalpy-composition diagram (Fig 2-4) or C_p(T − T_ref)."},
+  hL:  {t:r`h_L`, n:"Enthalpy of saturated liquid", u:"kJ/kmol", h:"Enthalpy-composition diagram, or Σx_i C_p,i (T − T_ref)."},
+  HV:  {t:r`H_V`, n:"Enthalpy of saturated vapor", u:"kJ/kmol", h:"Enthalpy-composition diagram, or Σy_i [λ_i + C_p,V,i (T − T_ref)]."},
+  hD:  {t:r`h_D`, n:"Enthalpy of the distillate (sat. liquid)", u:"kJ/kmol", h:"Saturated-liquid line of the H-x diagram at x_D."},
+  hB:  {t:r`h_B`, n:"Enthalpy of the bottoms (sat. liquid)", u:"kJ/kmol", h:"Saturated-liquid line of the H-x diagram at x_B."},
+  H1:  {t:r`H_1`, n:"Enthalpy of vapor leaving the top stage", u:"kJ/kmol", h:"Saturated-vapor line at y_1 = x_D (total condenser)."},
+  Qc:  {t:r`Q_c`, n:"Condenser duty", u:"kJ/h (kW, Btu/h)", h:"From the energy balance around the condenser. It comes out negative (heat removed)."},
+  QR:  {t:r`Q_R`, n:"Reboiler duty", u:"kJ/h", h:"From the overall column energy balance once Q_c is known. It comes out positive."},
+  Q:   {t:r`Q_{flash}`, n:"Heat added to the flash drum", u:"kJ/h", h:"Usually 0 (adiabatic, insulated drum)."},
+  Cp:  {t:r`C_p`, n:"Molar heat capacity", u:"kJ/(kmol·°C)", h:"Property tables (textbook appendix / Perry's)."},
+  lam: {t:r`\lambda`, n:"Latent heat of vaporization", u:"kJ/kmol", h:"Property tables, at T_ref or the normal boiling point."},
+  T:   {t:r`T`, n:"Temperature", u:"°C or K (°R for ideal-gas with ft units)", h:"Given, or from the T-x-y diagram / DePriester once compositions are known."},
+  Tref:{t:r`T_{ref}`, n:"Reference temperature for enthalpy", u:"°C", h:"You choose it (often 0°C or 25°C). Use the same one for all streams."},
+  P:   {t:r`P`, n:"Pressure", u:"kPa, atm, psia", h:"Given (drum or column pressure)."},
+  N:   {t:r`N`, n:"Number of equilibrium (theoretical) stages", u:"–", h:"From stepping off stages (McCabe-Thiele), Gilliland, or Kremser."},
+  Nmin:{t:r`N_{min}`, n:"Minimum number of stages (at total reflux)", u:"–", h:"Fenske equation. It includes the partial reboiler."},
+  NF:  {t:r`N_F`, n:"Feed stage location (counted from top)", u:"–", h:"Optimum feed stage from McCabe-Thiele, or N_F/N = N_F,min/N_min, or Kirkbride."},
+  FR:  {t:r`(FR_i)_{dist}`, n:"Fractional recovery of component i in the distillate", u:"– (e.g. 0.994)", h:"Given for the keys. For non-keys, calculate it with the Fenske NK equation."},
+  FRb: {t:r`(FR_i)_{bot}`, n:"Fractional recovery of component i in the bottoms", u:"–", h:"(FR)_bot = 1 − (FR)_dist."},
+  LK:  {t:r`LK,\ HK`, n:"Light key / heavy key", u:"–", h:"The two components whose recoveries or compositions are specified. LK is the more volatile one."},
+  phi: {t:r`\phi`, n:"Underwood root", u:"–", h:"Solve the 1st Underwood eq. by trial-and-error (Excel Goal Seek). For Case A/B the root lies between α_HK and α_LK."},
+  aref:{t:r`\alpha_{i\text{-}ref}`, n:"Relative volatility of i to a reference component", u:"–", h:"K_i / K_ref. Usually the HK is chosen as the reference (α_HK = 1)."},
+  Vmin:{t:r`V_{min}`, n:"Vapor flow in the rectifying section at minimum reflux", u:"kmol/h", h:"2nd Underwood equation; then L_min = V_min − D."},
+  LDmin:{t:r`(L/D)_{min}`, n:"Minimum reflux ratio", u:"–", h:"Binary: from the pinch on McCabe-Thiele. Multicomponent: Underwood."},
+  EO:  {t:r`E_O`, n:"Overall column efficiency", u:"– (fraction)", h:"O'Connell chart / correlation, or N_equil/N_actual."},
+  EMV: {t:r`E_{MV}`, n:"Murphree vapor efficiency", u:"– (fraction)", h:"Usually given in the problem."},
+  mu:  {t:r`\mu`, n:"Liquid viscosity", u:"cP", h:"At feed composition and average column T. Pure components from tables, mixture with ln μ_mix = Σ z_i ln μ_i."},
+  m:   {t:r`m`, n:"Slope of the equilibrium line (y = mx + b)", u:"–", h:"Henry's law: m = H/P_tot. Extraction: m = K_d."},
+  b:   {t:r`b`, n:"Intercept of the equilibrium line", u:"–", h:"Usually 0 for dilute systems (Henry's law)."},
+  x0:  {t:r`x_0`, n:"Solute mole fraction in the liquid entering the top", u:"–", h:"Given (often 0 for pure solvent)."},
+  xN:  {t:r`x_N`, n:"Solute mole fraction in the liquid leaving the bottom", u:"–", h:"From solute mass balance, or given (stripping spec)."},
+  y1:  {t:r`y_1`, n:"Solute mole fraction in the gas leaving the top", u:"–", h:"Usually the spec (e.g. 'remove 90%' → y_1 = 0.1·y_{N+1})."},
+  yN1: {t:r`y_{N+1}`, n:"Solute mole fraction in the gas entering the bottom", u:"–", h:"Given (feed gas)."},
+  ystar:{t:r`y^*`, n:"Gas composition in equilibrium with a liquid", u:"–", h:"y* = m x + b. E.g. y_1* = m x_0 + b."},
+  xstar:{t:r`x^*`, n:"Liquid composition in equilibrium with a gas", u:"–", h:"x* = (y − b)/m. E.g. x_N* = (y_{N+1} − b)/m."},
+  LVa: {t:r`L/V`, n:"Liquid-to-gas ratio (absorber)", u:"– (mol/mol)", h:"Given, or chosen as a multiple of (L/V)_min."},
+  H:   {t:r`H`, n:"Henry's law constant", u:"atm/mole frac (for m = H/P)", h:"Tables (Table 12-1 in Wankat)."},
+  Re:  {t:r`R`, n:"Raffinate (diluent) flow rate", u:"kg/h (solute-free)", h:"Given, the feed's diluent flow."},
+  Ex:  {t:r`E`, n:"Extract (solvent) flow rate", u:"kg/h (solute-free)", h:"Given solvent flow."},
+  Kd:  {t:r`K_d`, n:"Distribution coefficient (y/x)", u:"– (wt or mol frac basis)", h:"Table 13-3 in Wankat."},
+  W:   {t:r`W_{final}`, n:"Moles left in the still pot at the end", u:"kmol", h:"From the Rayleigh equation."},
+  xW:  {t:r`x_{W,final}`, n:"Final still-pot mole fraction of MVC", u:"–", h:"Usually given as the stopping criterion."},
+  xF:  {t:r`x_F`, n:"Initial charge mole fraction (batch)", u:"–", h:"Given."},
+  xDavg:{t:r`x_{D,avg}`, n:"Average distillate mole fraction", u:"–", h:"From the batch mass balance after W_final is known."},
+  Dtot:{t:r`D_{total}`, n:"Total distillate collected", u:"kmol", h:"D_total = F − W_final."},
+  sigma:{t:r`\sigma`, n:"Surface tension of the liquid", u:"dyn/cm", h:"Property tables (Poling et al.)."},
+  rhoL:{t:r`\rho_L`, n:"Liquid density", u:"lbm/ft³ (Fair method)", h:"Tables; convert g/mL × 62.43 = lbm/ft³."},
+  rhoV:{t:r`\rho_V`, n:"Vapor density", u:"lbm/ft³", h:"Ideal gas: ρ_V = P·MW/(R·T)."},
+  Csb: {t:r`C_{sb,f}`, n:"Capacity factor at flooding", u:"ft/s", h:"From Fair's chart (formula sheet p.7) using F_lv and tray spacing, or the log correlation."},
+  Flv: {t:r`F_{lv}`, n:"Flow parameter", u:"–", h:"Calculate it with W_L/W_V √(ρ_V/ρ_L). At the top, W_L/W_V = L/V when MW_L = MW_V."},
+  WL:  {t:r`W_L,\ W_V`, n:"Mass flow rates of liquid and vapor", u:"lbm/h", h:"Molar flow × MW."},
+  uf:  {t:r`u_{flood}`, n:"Flooding vapor velocity", u:"ft/s", h:"Calculated from C_sb,f, σ, ρ_L, ρ_V."},
+  eta: {t:r`\eta`, n:"Fraction of column cross-section available for vapor", u:"–", h:"Assumed 0.85–0.95 (often 0.90)."},
+  frac:{t:r`\text{fraction}`, n:"Fraction of flooding you operate at", u:"–", h:"Chosen 0.65–0.90 (typically 0.75)."},
+  MW:  {t:r`\overline{MW}_V`, n:"Average molecular weight of vapor", u:"lb/lbmol", h:"Σ y_i MW_i."},
+  Dia: {t:r`\text{Dia}`, n:"Column diameter", u:"ft", h:"Result of the calculation. Calculate at top and bottom, then use the larger."},
+  Gp:  {t:r`G'`, n:"Gas mass flux (packed column)", u:"lb/(s·ft²)", h:"Solve from the packed-flooding / Δp chart or correlation."},
+  Fp:  {t:r`F`, n:"Packing factor", u:"ft⁻¹", h:"Table 10-4 (random) or 10-5 (structured)."},
+  psi: {t:r`\psi`, n:"Density ratio", u:"–", h:"ψ = ρ_water/ρ_L."},
+  gc:  {t:r`g_c`, n:"Gravitational conversion factor", u:"32.2 ft·lbm/(lbf·s²)", h:"Constant."},
+  dp:  {t:r`\Delta p`, n:"Pressure drop per foot of packing", u:"in H₂O/ft", h:"Chosen design value: 0.1–0.4 vacuum, 0.25–0.4 absorbers, 0.4–0.8 atm/pressure columns."},
+  ab:  {t:r`\alpha,\ \beta`, n:"Packing pressure-drop constants", u:"–", h:"Table 10-4 (not the relative volatility!)."},
+  Lp:  {t:r`L'`, n:"Liquid mass flux", u:"lb/(s·ft²)", h:"L' = G'·(L/V)(MW_L/MW_V)."},
+  HETP:{t:r`\text{HETP}`, n:"Height equivalent to a theoretical plate", u:"ft (1–4 ft typical)", h:"Given, or measured experimentally at total reflux."},
+  Npr: {t:r`N_{actual}`, n:"Number of real trays", u:"–", h:"N_equil/E_O, rounded UP."},
+};
+
+// ===== Chapters =====
+const CH = [
+  {id:"ch2", no:"2", t:"Flash Distillation", c:"#2563eb"},
+  {id:"ch3", no:"3", t:"External Column Balances", c:"#0891b2"},
+  {id:"ch4", no:"4", t:"Binary Distillation (McCabe-Thiele)", c:"#7c3aed"},
+  {id:"ch5", no:"5", t:"Multicomponent Distillation", c:"#c026d3"},
+  {id:"ch7", no:"7", t:"Shortcut Methods (Fenske-Underwood-Gilliland)", c:"#db2777"},
+  {id:"ch9", no:"9", t:"Batch Distillation", c:"#ea580c"},
+  {id:"ch10", no:"10", t:"Staged & Packed Column Design", c:"#ca8a04"},
+  {id:"ch12", no:"12", t:"Absorption & Stripping", c:"#16a34a"},
+  {id:"ch13", no:"13", t:"Liquid-Liquid Extraction", c:"#0d9488"},
+];
+
+// g: "given" = printed on the T-252 formula sheet; "mem" = you must memorize
+const FX = [
+// ---------- CH 2 ----------
+{ch:"ch2", t:"Flash mass balances", g:"mem",
+ e:r`F = V + L \qquad F\,z = V\,y + L\,x`,
+ use:"The first step of any flash problem: overall and MVC balances on the drum.",
+ sy:["F","V","L","z","y","x"]},
+{ch:"ch2", t:"Flash operating line", g:"mem",
+ e:r`y = -\frac{L}{V}\,x + \frac{F}{V}\,z \;=\; -\frac{1-f}{f}\,x + \frac{z}{f} \;=\; -\frac{q}{1-q}\,x + \frac{z}{1-q}`,
+ use:"Binary flash, graphical solution. Draw it on the y-x diagram; where it hits the equilibrium curve gives x and y.",
+ tip:"It always passes through y = x = z. Slope = −L/V. Easy points: at x = 0, y = z/(1−q); at y = 0, x = z/q.",
+ sy:["y","x","L","V","F","z","f","q"]},
+{ch:"ch2", t:"Flash energy balance", g:"mem",
+ e:r`F\,h_F + Q_{flash} = V\,H_V + L\,h_L`,
+ use:"After the mass balance and equilibrium are solved (sequential procedure), find the feed temperature or heat duty.",
+ sy:["F","hF","Q","V","HV","L","hL"]},
+{ch:"ch2", t:"Ideal-mixture enthalpies", g:"mem",
+ e:r`h_L = x_A C_{p,A}(T-T_{ref}) + x_B C_{p,B}(T-T_{ref}) \\[4pt] H_V = y_A\big[\lambda_A + C_{p,V,A}(T-T_{ref})\big] + y_B\big[\lambda_B + C_{p,V,B}(T-T_{ref})\big]`,
+ use:"When no enthalpy-composition diagram is given.",
+ tip:"λ must be at T_ref, so liquid at T_ref is the zero point.",
+ sy:["hL","HV","x","y","Cp","lam","T","Tref"]},
+{ch:"ch2", t:"K value & relative volatility", g:"mem",
+ e:r`K_i = \frac{y_i}{x_i} \qquad \alpha_{AB} = \frac{K_A}{K_B} = \frac{y_A/x_A}{y_B/x_B} \qquad y = \frac{\alpha x}{1 + (\alpha-1)x}`,
+ use:"Equilibrium relations. The last form gives the binary equilibrium curve when α is constant.",
+ sy:["K","xi","yi","alpha","x","y"]},
+{ch:"ch2", t:"Rachford-Rice equation", g:"mem",
+ e:r`f\!\left(\tfrac{V}{F}\right) = \sum_{i=1}^{C} \frac{z_i\,(K_i-1)}{1 + (K_i-1)\,\frac{V}{F}} = 0 \\[6pt] x_i = \frac{z_i}{1+(K_i-1)\frac{V}{F}}, \qquad y_i = K_i\,x_i`,
+ use:"Multicomponent flash with T_drum and P_drum known. Solve for V/F, then get x_i and y_i.",
+ tip:"If you guess T_drum instead, iterate until the Rachford-Rice sum is zero.",
+ sy:["zi","K","f","xi","yi"]},
+{ch:"ch2", t:"Newton convergence for V/F", g:"mem",
+ e:r`\left(\tfrac{V}{F}\right)_{k+1} = \left(\tfrac{V}{F}\right)_k - \frac{f_k}{df_k/d(V/F)}, \quad \frac{df}{d(V/F)} = -\sum \frac{z_i (K_i-1)^2}{\big[1+(K_i-1)\frac{V}{F}\big]^2}`,
+ use:"Iterating Rachford-Rice by hand / Excel.",
+ sy:["zi","K","f"]},
+{ch:"ch2", t:"Gibbs phase rule", g:"mem",
+ e:r`\text{DOF} = C - P + 2`,
+ use:"Counting intensive degrees of freedom. A binary in 2 phases has DOF = 2, so fixing T and P fixes all compositions.",
+ sy:[{k:"_C", t:r`C`, n:"Number of components", u:"–", h:"Count them."},{k:"_P", t:r`P`, n:"Number of phases", u:"–", h:"Count them (V + L = 2)."}]},
+
+// ---------- CH 3 ----------
+{ch:"ch3", t:"External mass balances (D and B)", g:"mem",
+ e:r`F = D + B \qquad F z = D x_D + B x_B \\[4pt] D = F\,\frac{z - x_B}{x_D - x_B}, \qquad B = F - D`,
+ use:"Always the first step for a column: product flow rates from specs.",
+ sy:["F","D","B","z","xD","xB"]},
+{ch:"ch3", t:"Condenser duty (total condenser)", g:"mem",
+ e:r`Q_c = -D\left(1 + \frac{L_0}{D}\right)\big(H_1 - h_D\big)`,
+ use:"Energy balance around a total condenser with saturated reflux (h_0 = h_D, y_1 = x_D).",
+ tip:"Q_c is negative (heat removed). V_1 = D(1 + L_0/D).",
+ sy:["Qc","D","R","H1","hD"]},
+{ch:"ch3", t:"Overall energy balance → reboiler duty", g:"mem",
+ e:r`F h_F + Q_c + Q_R = D h_D + B h_B \\[4pt] Q_R = D h_D + B h_B - F h_F - Q_c`,
+ use:"After Q_c is known, find Q_R.",
+ sy:["F","hF","Qc","QR","D","hD","B","hB"]},
+
+// ---------- CH 4 ----------
+{ch:"ch4", t:"Top (rectifying) operating line", g:"given",
+ e:r`y = \frac{L}{V}\,x + \left(1 - \frac{L}{V}\right) x_D, \qquad \frac{L}{V} = \frac{L_0/D}{1 + L_0/D}`,
+ use:"Stepping off stages above the feed. Passes through (x_D, x_D).",
+ tip:"Only the first form is on the sheet. The L/V ↔ L/D conversion you must know.",
+ sy:["y","x","L","V","xD","R"]},
+{ch:"ch4", t:"Bottom (stripping) operating line", g:"given",
+ e:r`y = \frac{\overline{L}}{\overline{V}}\,x - \left(\frac{\overline{L}}{\overline{V}} - 1\right) x_B = \frac{\overline{L}}{\overline{V}}\,x - \frac{B}{\overline{V}}\,x_B`,
+ use:"Stepping off stages below the feed. Passes through (x_B, x_B).",
+ tip:"Careful: the sheet's 2nd form prints the intercept as −(L̄/V̄)x_B. The correct intercept is −(B/V̄)x_B, which equals −(L̄/V̄ − 1)x_B.",
+ sy:["y","x","Lb","Vb","xB","B"]},
+{ch:"ch4", t:"Feed line (q-line)", g:"given",
+ e:r`y = \frac{q}{q-1}\,x + \frac{1}{1-q}\,z_F, \qquad q = \frac{\overline{L} - L}{F}`,
+ use:"Locates where the two operating lines meet. Passes through (z, z).",
+ tip:"q = 1 → vertical line; q = 0 → horizontal line.",
+ sy:["q","y","x","z","Lb","L","F"]},
+{ch:"ch4", t:"q from feed enthalpy", g:"mem",
+ e:r`q = \frac{H_V - h_F}{H_V - h_L} \\[4pt] \text{Subcooled: } q = 1 + \frac{C_{p,L}(T_{bp} - T_F)}{\lambda} \qquad \text{Superheated: } q = -\frac{C_{p,V}(T_F - T_{dp})}{\lambda}`,
+ use:"When the feed is not saturated (cold liquid or superheated vapor).",
+ sy:["q","HV","hF","hL","Cp","lam","T"]},
+{ch:"ch4", t:"Flow changes at the feed (CMO)", g:"mem",
+ e:r`\overline{L} = L + qF \qquad \overline{V} = V - (1-q)F \qquad \overline{L} = \overline{V} + B`,
+ use:"Getting stripping-section flows from rectifying-section flows. Assumes constant molal overflow.",
+ sy:["Lb","Vb","L","V","q","F","B"]},
+{ch:"ch4", t:"Minimum reflux ratio (binary)", g:"mem",
+ e:r`\left(\frac{L}{V}\right)_{min} = \frac{x_D - y^*}{x_D - x^*} \qquad \left(\frac{L}{D}\right)_{min} = \frac{(L/V)_{min}}{1 - (L/V)_{min}}`,
+ use:"Draw the top op. line from (x_D, x_D) to the pinch point (x*, y*). The pinch is usually where the q-line meets equilibrium, or a tangent point for non-ideal curves.",
+ sy:["xD","ystar","xstar","LDmin"]},
+{ch:"ch4", t:"Murphree efficiencies", g:"mem",
+ e:r`E_{MV} = \frac{y_j - y_{j+1}}{y_j^* - y_{j+1}} \qquad E_{ML} = \frac{x_j - x_{j-1}}{x_j^* - x_{j-1}}`,
+ use:"Stepping off real trays: draw a pseudo-equilibrium curve a fraction E_MV of the way from the op. line to the equilibrium curve.",
+ sy:["EMV","y","ystar","x","xstar"]},
+{ch:"ch4", t:"Fenske, binary (total reflux)", g:"given",
+ e:r`N_{min} = \frac{\ln\left\{\left[\frac{x_A}{1-x_A}\right]_{dist} \Big/ \left[\frac{x_A}{1-x_A}\right]_{bot}\right\}}{\ln \alpha_{AB}}`,
+ use:"Minimum stages for a binary at total reflux (op. line = y = x).",
+ tip:"N_min includes the partial reboiler.",
+ sy:["Nmin","x","alpha"]},
+
+// ---------- CH 5 ----------
+{ch:"ch5", t:"Multicomponent external balances (fractional recovery)", g:"mem",
+ e:r`D\,x_{i,dist} = (FR_i)_{dist}\,F z_i \qquad B\,x_{i,bot} = \big[1 - (FR_i)_{dist}\big] F z_i \\[4pt] D = \sum_i D x_{i,dist}, \qquad x_{i,dist} = \frac{D x_{i,dist}}{D}`,
+ use:"With LK/HK recoveries given. Assume LNKs go fully to D and HNKs fully to B (then check with Fenske).",
+ sy:["F","zi","FR","D","B","LK"]},
+
+// ---------- CH 7 ----------
+{ch:"ch7", t:"Fenske equation (fractional recoveries)", g:"given",
+ e:r`N_{min} = \frac{\ln\left[\dfrac{(FR_{LK})_{dist}\,(FR_{HK})_{bot}}{\big[1 - (FR_{LK})_{dist}\big]\big[1 - (FR_{HK})_{bot}\big]}\right]}{\ln \alpha_{LK\text{-}HK}}`,
+ use:"Step 1 of FUG: minimum stages at total reflux, multicomponent.",
+ tip:"Use the geometric-average α = √(α_top·α_bot), or α at the average column T.",
+ sy:["Nmin","FR","FRb","alpha","LK"]},
+{ch:"ch7", t:"Fenske for non-key distribution", g:"given",
+ e:r`(FR_i)_{dist} = \frac{(\alpha_{i\text{-}HK})^{N_{min}}}{\dfrac{(FR_{HK})_{bot}}{1 - (FR_{HK})_{bot}} + (\alpha_{i\text{-}HK})^{N_{min}}}`,
+ use:"After N_min: how much of each non-key goes to the distillate.",
+ sy:["FR","aref","Nmin","FRb"]},
+{ch:"ch7", t:"Underwood equation 1 (find φ)", g:"given",
+ e:r`F(1-q) = \Delta V_{feed} = \sum_{i=1}^{C} \frac{\alpha_{i\text{-}ref}\,F z_i}{\alpha_{i\text{-}ref} - \phi}`,
+ use:"Step 2 of FUG: solve for φ by trial and error.",
+ tip:"For a saturated liquid (q = 1), the left side is 0. Pick the root between α_HK and α_LK.",
+ sy:["F","q","aref","zi","phi"]},
+{ch:"ch7", t:"Underwood equation 2 (V_min)", g:"given",
+ e:r`V_{min} = \sum_{i=1}^{C} \frac{\alpha_{i\text{-}ref}\,D x_{i,dist}}{\alpha_{i\text{-}ref} - \phi} \qquad L_{min} = V_{min} - D \qquad \left(\frac{L}{D}\right)_{min} = \frac{L_{min}}{D}`,
+ use:"Plug φ in to get minimum reflux. Use D x_i,dist from Case A (no NK distribute) or Case B (from Fenske).",
+ sy:["Vmin","aref","D","phi","LDmin"]},
+{ch:"ch7", t:"Gilliland correlation", g:"given",
+ e:r`X = \frac{L/D - (L/D)_{min}}{L/D + 1} \;\xrightarrow{\text{chart}}\; Y = \frac{N - N_{min}}{N + 1} \;\Rightarrow\; N = \frac{N_{min} + Y}{1 - Y}`,
+ use:"Step 3 of FUG: actual stages at a chosen L/D. The chart is on p.6 of the formula sheet.",
+ tip:"Liddle fit (memorize if no chart): Y = 0.545 − 0.591422X + 0.002743/X for 0.01 < X < 0.90. Rough check: N ≈ 2.5 N_min.",
+ sy:["R","LDmin","N","Nmin"]},
+{ch:"ch7", t:"Feed stage: Fenske ratio method", g:"given",
+ e:r`N_{F,min} = \frac{\ln\left[\dfrac{(x_{LK}/x_{HK})_{dist}}{z_{LK}/z_{HK}}\right]}{\ln \alpha_{LK\text{-}HK}} \qquad \frac{N_{F,min}}{N_{min}} = \frac{N_F}{N}`,
+ use:"Optimum feed location from shortcut results.",
+ sy:["NF","Nmin","N","alpha","LK"]},
+{ch:"ch7", t:"Feed stage: Kirkbride equation", g:"given",
+ e:r`\log\left(\frac{N_F - 1}{N - N_F}\right) = 0.206\,\log\left[\frac{B}{D}\left(\frac{z_{HK}}{z_{LK}}\right)\left(\frac{x_{LK,bot}}{x_{HK,dist}}\right)^{2}\right]`,
+ use:"Alternative feed-stage estimate.",
+ tip:"The T-252 sheet prints the coefficient as 0.26. The textbook (Wankat) value is 0.206. Confirm with your instructor which one to use.",
+ sy:["NF","N","B","D","LK"]},
+
+// ---------- CH 9 ----------
+{ch:"ch9", t:"Batch mass balances", g:"mem",
+ e:r`F = W_{final} + D_{total} \qquad F x_F = W_{final}\,x_{W,final} + D_{total}\,x_{D,avg}`,
+ use:"After Rayleigh gives W_final, get D_total and x_D,avg.",
+ sy:["F","W","Dtot","xF","xW","xDavg"]},
+{ch:"ch9", t:"Rayleigh equation", g:"given",
+ e:r`\ln\frac{W_{final}}{F} = -\int_{x_{W,final}}^{x_F}\frac{dx}{y - x} \quad\Rightarrow\quad W_{final} = F\exp\left(-\int_{x_{W,final}}^{x_F}\frac{dx}{y - x}\right)`,
+ use:"Simple batch distillation (still pot = 1 equilibrium stage, y in equilibrium with x).",
+ tip:"For multistage batch, replace y by x_D, found from McCabe-Thiele at each x_W.",
+ sy:["W","F","xF","xW","x","y"]},
+{ch:"ch9", t:"Simpson's rule for the Rayleigh integral", g:"given",
+ e:r`\text{Area} = \frac{x_F - x_{W,final}}{6}\left[\left.\frac{1}{y-x}\right|_{x_{W,final}} + 4\left.\frac{1}{y-x}\right|_{\frac{x_{W,final}+x_F}{2}} + \left.\frac{1}{y-x}\right|_{x_F}\right]`,
+ use:"Numerical integration when you have equilibrium data (read y at 3 x values).",
+ sy:["xF","xW","x","y"]},
+{ch:"ch9", t:"Rayleigh with constant α (analytical)", g:"mem",
+ e:r`\ln\frac{W_{final}}{F} = \frac{1}{\alpha-1}\ln\left[\frac{x_{W,final}(1-x_F)}{x_F(1-x_{W,final})}\right] + \ln\left[\frac{1-x_F}{1-x_{W,final}}\right]`,
+ use:"When α is constant (ideal system), no integration needed.",
+ sy:["W","F","alpha","xW","xF"]},
+{ch:"ch9", t:"Multistage batch operating line", g:"mem",
+ e:r`y_{j+1} = \frac{L}{V}\,x_j + \left(1 - \frac{L}{V}\right) x_D`,
+ use:"Constant reflux: for each guessed x_D, step off stages to find x_W, build a table, then integrate dx_W/(x_D − x_W).",
+ sy:["L","V","x","y","xD"]},
+
+// ---------- CH 10 ----------
+{ch:"ch10", t:"Overall efficiency definition", g:"mem",
+ e:r`E_O = \frac{N_{equil}}{N_{actual}} \qquad N_{actual} = \frac{N_{equil}}{E_O}`,
+ use:"Converting equilibrium stages to real trays.",
+ tip:"Don't count the partial reboiler / partial condenser in N_equil. Always round N_actual UP.",
+ sy:["EO","N","Npr"]},
+{ch:"ch10", t:"O'Connell correlation (distillation)", g:"given",
+ e:r`E_O = 0.52782 - 0.27511\log(\alpha\mu) + 0.044923\big[\log(\alpha\mu)\big]^2`,
+ use:"Estimating E_O. Chart on p.8 of the sheet. Use the lower value if chart and equation differ.",
+ tip:"μ in cP; α and μ at the average column T and feed composition.",
+ sy:["EO","alpha","mu"]},
+{ch:"ch10", t:"Mixture liquid viscosity", g:"given",
+ e:r`\ln \mu_{mix} = \sum z_i \ln \mu_i`,
+ use:"Getting μ for O'Connell.",
+ sy:["mu","zi"]},
+{ch:"ch10", t:"E_O from Murphree efficiency (Lewis)", g:"given",
+ e:r`E_O = \frac{\log\left[1 + E_{MV}\left(\frac{mV}{L} - 1\right)\right]}{\log\left(\frac{mV}{L}\right)}`,
+ use:"Converting a known E_MV to an overall efficiency (straight equilibrium and op. lines).",
+ sy:["EO","EMV","m","V","L"]},
+{ch:"ch10", t:"Flooding velocity (Fair)", g:"given",
+ e:r`u_{flood} = C_{sb,f}\left(\frac{\sigma}{20}\right)^{0.2}\sqrt{\frac{\rho_L - \rho_V}{\rho_V}}`,
+ use:"Step 1 of tray-column diameter.",
+ sy:["uf","Csb","sigma","rhoL","rhoV"]},
+{ch:"ch10", t:"Flow parameter", g:"given",
+ e:r`F_{lv} = \frac{W_L}{W_V}\sqrt{\frac{\rho_V}{\rho_L}} = \frac{Q_L}{Q_V}\sqrt{\frac{\rho_L}{\rho_V}} = \frac{L}{V}\sqrt{\frac{\rho_V}{\rho_L}}\ (\text{if } MW_L = MW_V)`,
+ use:"Calculate it first, then read C_sb,f from the chart.",
+ sy:["Flv","WL","rhoL","rhoV"]},
+{ch:"ch10", t:"Capacity factor correlation", g:"given",
+ e:r`\log C_{sb,f} = -1.1977 - 0.53143\log F_{lv} - 0.18760\,(\log F_{lv})^2`,
+ use:"Instead of the chart.",
+ tip:"This fit gives very low C_sb (~0.08 ft/s at F_lv = 0.55), so it matches the smallest (6-in) tray spacing. For 24-in spacing, read the chart (p.7). Check the spacing before using it.",
+ sy:["Csb","Flv"]},
+{ch:"ch10", t:"Tray column diameter", g:"given",
+ e:r`Dia\,(\text{ft}) = \sqrt{\frac{4\,V\,\overline{MW}_V}{3600\,\pi\,\eta\,\rho_V\,(fraction)\,u_{flood}}}`,
+ use:"Final step. V in lbmol/h.",
+ tip:"Calculate at the top and at the bottom, then use the larger diameter.",
+ sy:["Dia","V","MW","eta","rhoV","frac","uf"]},
+{ch:"ch10", t:"Ideal-gas vapor density", g:"mem",
+ e:r`\rho_V = \frac{P\cdot \overline{MW}_V}{R\,T}, \qquad R = 0.7302\ \frac{\text{ft}^3\,\text{atm}}{\text{lbmol}\,^\circ\text{R}}`,
+ use:"Getting ρ_V for the diameter equations.",
+ sy:["rhoV","P","MW","T"]},
+{ch:"ch10", t:"Top-to-bottom diameter ratio", g:"given",
+ e:r`\frac{Dia_{top}}{Dia_{bot}} = \left(\frac{V_{top}}{V_{bot}}\right)^{0.5}\left(\frac{MW_{V,top}}{MW_{V,bot}}\right)^{0.25}\left(\frac{\rho_{L,bot}}{\rho_{L,top}}\right)^{0.25}\left(\frac{T_{top}}{T_{bot}}\right)^{0.25}\left(\frac{\sigma_{bot}}{\sigma_{top}}\right)^{0.1}\left(\frac{C_{sb,f,bot}}{C_{sb,f,top}}\right)^{0.5}`,
+ use:"Quick comparison of top vs bottom diameter without full recalculation.",
+ sy:["V","MW","rhoL","T","sigma","Csb"]},
+{ch:"ch10", t:"Packing height (HETP method)", g:"mem",
+ e:r`H_{packing} = N_{equil}\times HETP`,
+ use:"Packed column height from the number of equilibrium stages.",
+ sy:["HETP","N"]},
+{ch:"ch10", t:"Packed column flooding / Δp correlation", g:"given",
+ e:r`\log_{10}\left[\frac{G'^2 F \psi \mu^{0.2}}{\rho_G \rho_L g_c}\right] = -1.6678 - 1.085\log F_{lv} - 0.29655\big[\log F_{lv}\big]^2`,
+ use:"Solve for G' at flooding (generalized chart on p.7 for other Δp curves).",
+ tip:"Here F_lv = (L'/G')(ρ_G/ρ_L)^0.5 and μ in cP.",
+ sy:["Gp","Fp","psi","mu","rhoV","rhoL","gc","Flv"]},
+{ch:"ch10", t:"Packing pressure drop", g:"given",
+ e:r`\Delta p = \alpha\left(10^{\beta L'}\right)\left(\frac{G'^2}{\rho_G}\right)`,
+ use:"Pressure drop for a chosen packing at given fluxes.",
+ sy:["dp","ab","Lp","Gp","rhoV"]},
+{ch:"ch10", t:"Packed column area and diameter", g:"given",
+ e:r`\text{Area} = \frac{V\,(\text{lbmol/s})\cdot MW_V\,(\text{lb/lbmol})}{G'\,(\text{lb/s·ft}^2)} \qquad Dia = \sqrt{\frac{4\,\text{Area}}{\pi}}`,
+ use:"Final step for packed-column diameter.",
+ tip:"V must be in lbmol/s, not /h. Only the area equation is on the sheet.",
+ sy:["V","MW","Gp","Dia"]},
+
+// ---------- CH 12 ----------
+{ch:"ch12", t:"Equilibrium line (Henry's law)", g:"mem",
+ e:r`y = m\,x + b, \qquad m = \frac{H}{P_{tot}}`,
+ use:"Equilibrium for dilute absorption/stripping.",
+ sy:["m","b","H","P"]},
+{ch:"ch12", t:"Absorber operating line (dilute)", g:"mem",
+ e:r`y_{j+1} = \frac{L}{V}\,x_j + \left(y_1 - \frac{L}{V}\,x_0\right)`,
+ use:"McCabe-Thiele for absorption. Passes through (x_0, y_1) and (x_N, y_{N+1}).",
+ tip:"Absorber: op. line ABOVE equilibrium. Stripper: BELOW, so use (L/V)_max.",
+ sy:["LVa","x0","y1","xN","yN1"]},
+{ch:"ch12", t:"Minimum L/V", g:"mem",
+ e:r`\left(\frac{L}{V}\right)_{min} = \frac{y_{N+1} - y_1}{x_N^* - x_0}, \qquad x_N^* = \frac{y_{N+1} - b}{m}`,
+ use:"Line from (x_0, y_1) to the equilibrium point at y_{N+1} (straight equilibrium).",
+ sy:["LVa","yN1","y1","xstar","x0"]},
+{ch:"ch12", t:"Kremser: parallel lines (L/V = m)", g:"given",
+ e:r`N = \frac{y_{N+1} - y_1}{\Delta y} = \frac{y_{N+1} - y_1}{y_1 - (L/V)x_0 - b}`,
+ use:"Special case: absorption factor L/(mV) = 1.",
+ sy:["N","yN1","y1","LVa","x0","b"]},
+{ch:"ch12", t:"Kremser: gas-phase form", g:"given",
+ e:r`N = \frac{\ln\left[\left(1 - \frac{mV}{L}\right)\left(\frac{y_{N+1} - y_1^*}{y_1 - y_1^*}\right) + \frac{mV}{L}\right]}{\ln\left(\frac{L}{mV}\right)}, \qquad y_1^* = m x_0 + b`,
+ use:"Absorption with gas compositions given, L/(mV) ≠ 1. The most-used form.",
+ sy:["N","m","V","L","yN1","y1","ystar","x0"]},
+{ch:"ch12", t:"Kremser: liquid-phase form", g:"given",
+ e:r`N = \frac{\ln\left[\left(1 - \frac{L}{mV}\right)\left(\frac{x_0 - x_N^*}{x_N - x_N^*}\right) + \frac{L}{mV}\right]}{\ln\left(\frac{mV}{L}\right)}, \qquad x_N^* = \frac{y_{N+1} - b}{m}`,
+ use:"Stripping (liquid compositions given).",
+ sy:["N","m","V","L","x0","xN","xstar"]},
+{ch:"ch12", t:"Kremser: other forms", g:"given",
+ e:r`N = \frac{\ln\left(\frac{y_{N+1} - y^*_{N+1}}{y_1 - y_1^*}\right)}{\ln\left(\frac{y_{N+1} - y_1}{y^*_{N+1} - y_1^*}\right)} \qquad N = \frac{\ln\left(\frac{x_N - x_N^*}{x_0 - x_0^*}\right)}{\ln\left(\frac{x_0^* - x_N^*}{x_0 - x_N}\right)} \qquad \frac{y_{N+1} - y_1}{y_{N+1} - y_1^*} = \frac{\frac{L}{mV} - \left(\frac{L}{mV}\right)^{N+1}}{1 - \left(\frac{L}{mV}\right)^{N+1}}`,
+ use:"Rating problems: N is known, find an outlet composition (use the fraction form).",
+ sy:["N","yN1","y1","ystar","xstar","x0","xN","m","L","V"]},
+{ch:"ch12", t:"Actual stages with Murphree efficiency", g:"given",
+ e:r`N_{actual} = -\frac{\ln\left[\left(1 - \frac{mV}{L}\right)\left(\frac{y_{N+1} - y_1^*}{y_1 - y_1^*}\right) + \frac{mV}{L}\right]}{\ln\left[1 + E_{MV}\left(\frac{mV}{L} - 1\right)\right]}`,
+ use:"Real trays directly, when E_MV is given.",
+ sy:["Npr","EMV","m","V","L","yN1","y1","ystar"]},
+{ch:"ch12", t:"O'Connell correlation (absorbers)", g:"given",
+ e:r`E_O = 0.37237 + 0.19339\log\left(\frac{Hp}{\mu}\right) + 0.024816\left[\log\left(\frac{Hp}{\mu}\right)\right]^2`,
+ use:"Overall efficiency of an absorber (chart on p.8).",
+ tip:"O'Connell units: H in lbmol/(atm·ft³), p in atm, μ in cP.",
+ sy:["EO","H","P","mu"]},
+
+// ---------- CH 13 ----------
+{ch:"ch13", t:"Distribution coefficient", g:"mem",
+ e:r`K_d = \frac{y}{x} \qquad (y = m x + b,\ m = K_d,\ b = 0)`,
+ use:"Equilibrium for dilute immiscible extraction. y is in the solvent (extract), x is in the diluent (raffinate).",
+ sy:["Kd","y","x"]},
+{ch:"ch13", t:"Extraction operating line", g:"mem",
+ e:r`y_{j+1} = \frac{R}{E}\,x_j + \left(y_1 - \frac{R}{E}\,x_0\right)`,
+ use:"McCabe-Thiele for countercurrent extraction. Slope = R/E.",
+ sy:["Re","Ex","x0","y1","x","y"]},
+{ch:"ch13", t:"Kremser for extraction: parallel case", g:"given",
+ e:r`N = \frac{y_{N+1} - y_1}{y_1 - (R/E)\,x_0 - b}`,
+ use:"When the extraction factor mE/R = 1.",
+ sy:["N","yN1","y1","Re","Ex","x0","b"]},
+{ch:"ch13", t:"Kremser for extraction: general", g:"given",
+ e:r`N = \frac{\ln\left[\left(1 - \frac{mE}{R}\right)\left(\frac{y_{N+1} - y_1^*}{y_1 - y_1^*}\right) + \frac{mE}{R}\right]}{\ln\left(\frac{R}{mE}\right)}`,
+ use:"Same as absorption Kremser with L/V → R/E. mE/R = K_d E/R is the extraction factor.",
+ tip:"Any Ch 12 Kremser form works. Just replace L with R and V with E.",
+ sy:["N","m","Ex","Re","yN1","y1","ystar"]},
+];
+
+</script>
+<script>
+const $=s=>document.querySelector(s);
+let filt='all', view='formulas';
+const chMap=Object.fromEntries(CH.map(c=>[c.id,c]));
+FX.forEach((f,i)=>f.id='f'+i);
+
+function sym(k){ return typeof k==='string' ? {k,...S[k]} : k; }
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+function buildStats(){
+  const g=FX.filter(f=>f.g==='given').length;
+  $('#stats').innerHTML=`<span class="stat">${FX.length} formulas</span><span class="stat">${Object.keys(S).length} symbols explained</span><span class="stat">${g} given in exam</span><span class="stat">${FX.length-g} to memorize</span>`;
+}
+
+function buildNav(){
+  let h='<div class="sep">Chapters</div>';
+  for(const c of CH){
+    const n=FX.filter(f=>f.ch===c.id).length;
+    h+=`<a href="#${c.id}" data-go="${c.id}"><span class="dot" style="background:${c.c}">${c.no}</span>${esc(c.t)}<span class="cnt">${n}</span></a>`;
+  }
+  h+=`<div class="legend"><div><span class="badge given">Given</span> on the formula sheet</div><div><span class="badge mem">Memorize</span> not on the sheet</div></div>`;
+  $('#nav').innerHTML=h;
+}
+
+function rowsFor(list){
+  return list.map(k=>{const s=sym(k); return `<tr><td class="sym">\\(${s.t}\\)</td><td><b>${esc(s.n)}</b></td><td class="unit">${esc(s.u)}</td><td>${esc(s.h)}</td></tr>`}).join('');
+}
+
+function buildFormulas(){
+  let h='';
+  for(const c of CH){
+    const list=FX.filter(f=>f.ch===c.id);
+    h+=`<section class="chap" id="${c.id}" data-ch="${c.id}"><div class="chhead"><div class="num" style="background:${c.c}">${c.no}</div><h2>Ch ${c.no} · ${esc(c.t)}</h2></div>`;
+    for(const f of list){
+      const text=[f.t,f.use,f.tip||'',...f.sy.map(k=>{const s=sym(k);return s.n+' '+s.u+' '+s.h+' '+s.t})].join(' ').toLowerCase();
+      h+=`<article class="card" id="${f.id}" data-g="${f.g}" data-text="${esc(text)}" style="--c:${c.c}">
+        <div class="ctop"><h3>${esc(f.t)}</h3><span class="badge ${f.g}">${f.g==='given'?'Given in exam':'Memorize'}</span></div>
+        <div class="eq">\\[${f.e}\\]</div>
+        <div class="use"><b>Use it when:</b> ${esc(f.use)}</div>
+        ${f.tip?`<div class="tip">⚠️ ${esc(f.tip)}</div>`:''}
+        <details><summary>What each term means: name, unit, how to get it (${f.sy.length})</summary>
+          <div class="tw"><table><thead><tr><th>Symbol</th><th>Name</th><th>Unit</th><th>How you usually get it</th></tr></thead><tbody>${rowsFor(f.sy)}</tbody></table></div>
+        </details></article>`;
+    }
+    h+='</section>';
+  }
+  h+='<div id="empty" class="hidden">No formulas match. Try another word.</div>';
+  return h;
+}
+
+function buildGlossary(){
+  const used={};
+  FX.forEach(f=>f.sy.forEach(k=>{if(typeof k==='string'){(used[k]=used[k]||[]).push(f)}}));
+  const keys=Object.keys(S).sort((a,b)=>S[a].n.localeCompare(S[b].n));
+  let rows=keys.map(k=>{const s=S[k];const fs=used[k]||[];
+    const text=(s.n+' '+s.u+' '+s.h+' '+s.t+' '+fs.map(f=>f.t).join(' ')).toLowerCase();
+    return `<tr data-text="${esc(text)}"><td class="sym">\\(${s.t}\\)</td><td><b>${esc(s.n)}</b><div style="margin-top:4px">${fs.map(f=>`<a href="#${f.id}" data-jump="${f.id}">Ch ${chMap[f.ch].no}: ${esc(f.t)}</a>`).join(' ')}</div></td><td class="unit">${esc(s.u)}</td><td>${esc(s.h)}</td></tr>`}).join('');
+  return `<section class="chap"><div class="chhead"><div class="num" style="background:#4f46e5">Σ</div><h2>Symbol glossary: every term, in one place</h2></div>
+    <div class="card gl" style="--c:#4f46e5"><div class="tw"><table><thead><tr><th>Symbol</th><th>Name &amp; where it appears</th><th>Unit</th><th>How you usually get it</th></tr></thead><tbody id="gbody">${rows}</tbody></table></div></div></section>`;
+}
+
+let fHTML, gHTML;
+async function render(){
+  const main=$('#main');
+  main.innerHTML=`<div id="vf">${fHTML}</div><div id="vg" class="hidden">${gHTML}</div>`;
+  await MathJax.typesetPromise([main]);
+  apply();
+}
+
+function apply(){
+  const q=$('#q').value.trim().toLowerCase();
+  $('#vf').classList.toggle('hidden',view!=='formulas');
+  $('#vg').classList.toggle('hidden',view!=='glossary');
+  $('#fchips').style.display=view==='formulas'?'':'none';
+  if(view==='formulas'){
+    let any=0;
+    document.querySelectorAll('#vf section.chap').forEach(sec=>{
+      let n=0;
+      sec.querySelectorAll('.card').forEach(c=>{
+        const ok=(filt==='all'||c.dataset.g===filt)&&(!q||c.dataset.text.includes(q)||c.querySelector('h3').textContent.toLowerCase().includes(q));
+        c.classList.toggle('hidden',!ok); if(ok)n++;
+      });
+      sec.classList.toggle('hidden',n===0); any+=n;
+    });
+    $('#empty').classList.toggle('hidden',any>0);
+  } else {
+    document.querySelectorAll('#gbody tr').forEach(r=>r.classList.toggle('hidden',q&&!r.dataset.text.includes(q)));
+  }
+}
+
+function setView(v){ view=v; document.querySelectorAll('#vchips .chip').forEach(b=>b.classList.toggle('on',b.dataset.v===v)); apply(); window.scrollTo({top:0}); }
+
+document.addEventListener('click',e=>{
+  const fb=e.target.closest('#fchips .chip'); if(fb){filt=fb.dataset.f;document.querySelectorAll('#fchips .chip').forEach(b=>b.classList.toggle('on',b===fb));apply();}
+  const vb=e.target.closest('#vchips .chip'); if(vb){setView(vb.dataset.v);}
+  const go=e.target.closest('[data-go]'); if(go){e.preventDefault(); if(view!=='formulas')setView('formulas'); const el=document.getElementById(go.dataset.go); if(el&&!el.classList.contains('hidden'))el.scrollIntoView({behavior:'smooth'});}
+  const j=e.target.closest('[data-jump]'); if(j){e.preventDefault(); $('#q').value=''; filt='all'; document.querySelectorAll('#fchips .chip').forEach(b=>b.classList.toggle('on',b.dataset.f==='all')); setView('formulas');
+    const el=document.getElementById(j.dataset.jump); el.querySelector('details').open=true; el.scrollIntoView({behavior:'smooth',block:'start'}); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');}
+});
+$('#q').addEventListener('input',apply);
+
+buildStats(); buildNav();
+fHTML=buildFormulas(); gHTML=buildGlossary();
+function boot(){ if(window.MathJax&&MathJax.typesetPromise){render();} else setTimeout(boot,80); }
+boot();
+</script>
+</body>
+</html>
